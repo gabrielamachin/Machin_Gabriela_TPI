@@ -17,9 +17,13 @@ def session_factory() -> Session:
 def create_all_tables() -> None:
     """Crea las tablas que no existan.
 
-    Importar los modelos es lo que los registra en SQLModel.metadata:
-    cada módulo de dominio se agrega acá cuando se implementa.
+    Importar los modelos es lo que los registra en SQLModel.metadata y permite
+    resolver las relaciones entre módulos. Deben importarse TODOS antes de la
+    primera consulta (la app lo garantiza llamando a esta función al iniciar).
     """
+    from app.modules.categorias import models as _categorias  # noqa: F401
+    from app.modules.pedidos import models as _pedidos  # noqa: F401
+    from app.modules.productos import models as _productos  # noqa: F401
     from app.modules.usuarios import models as _usuarios  # noqa: F401
 
     SQLModel.metadata.create_all(engine)

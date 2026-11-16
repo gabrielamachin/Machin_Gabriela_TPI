@@ -1,9 +1,12 @@
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 from app.core.utils import utcnow
+
+if TYPE_CHECKING:
+    from app.modules.pedidos.models import Pedido
 
 ROLE_USER = "user"
 ROLE_ADMIN = "admin"
@@ -21,5 +24,4 @@ class Usuario(SQLModel, table=True):
     disabled: bool = Field(default=False)  # baja lógica
     created_at: datetime = Field(default_factory=utcnow)
 
-    # La relación `pedidos: list[Pedido] = Relationship(back_populates="usuario")`
-    # se agrega junto con el modelo Pedido (commit de pedidos).
+    pedidos: list["Pedido"] = Relationship(back_populates="usuario")
