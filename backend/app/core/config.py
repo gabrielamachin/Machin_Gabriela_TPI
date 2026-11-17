@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     COOKIE_NAME: str = "access_token"
+    COOKIE_SECURE: bool = False  # true si se sirve por https
 
     # CORS con credenciales: el origen debe ser explícito (no "*")
     FRONTEND_ORIGIN: str = "http://localhost:5173"
