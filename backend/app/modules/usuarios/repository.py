@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from app.core.base_repository import BaseRepository
 
@@ -16,3 +16,6 @@ class UsuarioRepository(BaseRepository[Usuario]):
 
     def get_by_email(self, email: str) -> Optional[Usuario]:
         return self.session.exec(select(Usuario).where(Usuario.email == email)).first()
+
+    def list_ordenados(self) -> list[Usuario]:
+        return list(self.session.exec(select(Usuario).order_by(col(Usuario.id))).all())
