@@ -17,6 +17,12 @@ class ProductoRepository(BaseRepository[Producto]):
         producto = self.get_by_id(producto_id)
         return producto if producto is not None and producto.activo else None
 
+    def get_for_update(self, producto_id: int) -> Optional[Producto]:
+        """Lee el producto bloqueando la fila (SELECT ... FOR UPDATE) hasta el fin de la
+        transacción, para que dos pedidos simultáneos no descuenten el mismo stock.
+        No filtra por `activo`. SQLite ignora el bloqueo; PostgreSQL lo aplica."""
+        return self.session.get(Producto, producto_id, with_for_update=True)
+
     def search(
         self,
         search: Optional[str] = None,

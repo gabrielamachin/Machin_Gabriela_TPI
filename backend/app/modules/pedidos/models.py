@@ -38,7 +38,10 @@ class Pedido(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=utcnow)
 
     usuario: Optional["Usuario"] = Relationship(back_populates="pedidos")
-    items: list["DetallePedido"] = Relationship(back_populates="pedido")
+    items: list["DetallePedido"] = Relationship(
+        back_populates="pedido",
+        sa_relationship_kwargs={"order_by": "DetallePedido.id"},  # líneas en el orden en que se crearon
+    )
 
 
 class DetallePedido(SQLModel, table=True):
