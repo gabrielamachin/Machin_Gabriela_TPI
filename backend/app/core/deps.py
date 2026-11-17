@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import settings
 from app.core.security import decode_access_token
-from app.modules.usuarios.models import Usuario
+from app.modules.usuarios.models import ROLE_ADMIN, Usuario
 from app.modules.usuarios.unit_of_work import UsuarioUnitOfWork
 
 CUENTA_DESACTIVADA = "Cuenta de usuario desactivada"
@@ -68,3 +68,8 @@ def require_role(roles: Sequence[str]) -> Callable[..., Usuario]:
         return current_user
 
     return verificar_rol
+
+
+# Atajo para los endpoints exclusivos del administrador.
+require_admin = require_role([ROLE_ADMIN])
+AdminUser = Annotated[Usuario, Depends(require_admin)]

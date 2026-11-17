@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import create_all_tables
 from app.modules.auth.router import router as auth_router
+from app.modules.categorias.router import router as categorias_router
 from app.modules.usuarios.router import router as usuarios_router
 
 
@@ -30,4 +31,5 @@ app.add_middleware(
 api_router = APIRouter(prefix=settings.API_PREFIX)
 api_router.include_router(auth_router)
 api_router.include_router(usuarios_router)
+api_router.include_router(categorias_router)
 app.include_router(api_router)
