@@ -46,3 +46,16 @@ class PedidoRead(SQLModel):
 class PedidosPaginados(SQLModel):
     total: int
     items: list[PedidoRead]
+
+
+class CambioEstado(SQLModel):
+    estado: EstadoPedido
+
+
+class ResumenPedidos(SQLModel):
+    pendientes: int
+    en_preparacion: int
+    entregados: int
+    cancelados: int
+    pedidos_hoy: int
+    ingresos_entregados: float

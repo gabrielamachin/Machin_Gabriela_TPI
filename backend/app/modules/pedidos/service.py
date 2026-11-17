@@ -1,10 +1,27 @@
 from typing import Optional
 
+from app.core.utils import utcnow
 from app.modules.productos.service import ProductoNoEncontrado
 
-from .models import PENDIENTE, DetallePedido, Pedido
-from .schemas import PedidoCreate, PedidoRead, PedidosPaginados
+from .models import (
+    CANCELADO,
+    ENTREGADO,
+    EN_PREPARACION,
+    PENDIENTE,
+    DetallePedido,
+    Pedido,
+)
+from .schemas import PedidoCreate, PedidoRead, PedidosPaginados, ResumenPedidos
 from .unit_of_work import PedidoUnitOfWork
+
+# Máquina de estados (RN-02): estado actual -> estados a los que puede pasar.
+# ENTREGADO y CANCELADO son terminales.
+TRANSICIONES: dict[str, set[str]] = {
+    PENDIENTE: {EN_PREPARACION, CANCELADO},
+    EN_PREPARACION: {ENTREGADO, CANCELADO},
+    ENTREGADO: set(),
+    CANCELADO: set(),
+}
 
 
 # --- Excepciones de dominio: el Router las traduce a HTTP ---
@@ -39,10 +56,21 @@ class StockInsuficiente(ReglaDeNegocio):
         )
 
 
+class TransicionInvalida(ReglaDeNegocio):
+    def __init__(self, actual: str, nuevo: str) -> None:
+        super().__init__(f"Transición inválida: no se puede pasar de {actual} a {nuevo}")
+
+
+class CancelacionNoPermitida(ReglaDeNegocio):
+    def __init__(self) -> None:
+        super().__init__("Solo se puede cancelar un pedido en estado PENDIENTE")
+
+
 class PedidoService:
     def __init__(self, uow: PedidoUnitOfWork) -> None:
         self.uow = uow
 
+    # ------------------------------------------------------------------ crear
     def crear(self, usuario_id: int, data: PedidoCreate) -> PedidoRead:
         """RN-01: todo ocurre en una sola transacción; si algo falla no se persiste nada
         (tampoco el descuento de stock)."""
@@ -90,6 +118,7 @@ class PedidoService:
             uow.pedidos.add(pedido)  # UPDATE del total + flush de las líneas y del stock
             return PedidoRead.model_validate(pedido)
 
+    # --------------------------------------------------------------- consultas
     def listar(
         self,
         usuario_id: int,
@@ -116,3 +145,54 @@ class PedidoService:
             if not es_admin and pedido.usuario_id != usuario_id:
                 raise PedidoAjeno()
             return PedidoRead.model_validate(pedido)
+
+    # ----------------------------------------------------------------- estados
+    def cambiar_estado(self, pedido_id: int, nuevo_estado: str) -> PedidoRead:
+        """RN-02 / RN-03 (admin): avanza o cancela según TRANSICIONES."""
+        with self.uow as uow:
+            pedido = uow.pedidos.get_by_id(pedido_id)
+            if pedido is None:
+                raise PedidoNoEncontrado()
+            if nuevo_estado not in TRANSICIONES[pedido.estado]:  # se valida ANTES de modificar
+                raise TransicionInvalida(pedido.estado, nuevo_estado)
+            self._aplicar_estado(uow, pedido, nuevo_estado)
+            return PedidoRead.model_validate(pedido)
+
+    def cancelar_propio(self, pedido_id: int, usuario_id: int) -> PedidoRead:
+        """RN-03 / RN-04: el dueño cancela su pedido, solo si está en PENDIENTE."""
+        with self.uow as uow:
+            pedido = uow.pedidos.get_by_id(pedido_id)
+            if pedido is None:
+                raise PedidoNoEncontrado()
+            if pedido.usuario_id != usuario_id:
+                raise PedidoAjeno()
+            if pedido.estado != PENDIENTE:
+                raise CancelacionNoPermitida()
+            self._aplicar_estado(uow, pedido, CANCELADO)
+            return PedidoRead.model_validate(pedido)
+
+    def _aplicar_estado(self, uow: PedidoUnitOfWork, pedido: Pedido, nuevo_estado: str) -> None:
+        if nuevo_estado == CANCELADO:
+            # RN-03: el stock se restituye en la MISMA transacción que cambia el estado.
+            # Orden por producto_id para bloquear siempre en el mismo orden (sin deadlocks).
+            for linea in sorted(pedido.items, key=lambda d: d.producto_id):
+                producto = uow.productos.get_for_update(linea.producto_id)
+                if producto is not None:  # se restituye aunque el producto esté dado de baja
+                    producto.stock += linea.cantidad
+        pedido.estado = nuevo_estado
+        pedido.updated_at = utcnow()
+        uow.pedidos.add(pedido)
+
+    # ----------------------------------------------------------------- resumen
+    def resumen(self) -> ResumenPedidos:
+        with self.uow as uow:
+            por_estado = uow.pedidos.count_by_estado()
+            inicio_hoy = utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+            return ResumenPedidos(
+                pendientes=por_estado.get(PENDIENTE, 0),
+                en_preparacion=por_estado.get(EN_PREPARACION, 0),
+                entregados=por_estado.get(ENTREGADO, 0),
+                cancelados=por_estado.get(CANCELADO, 0),
+                pedidos_hoy=uow.pedidos.count_desde(inicio_hoy),
+                ingresos_entregados=uow.pedidos.sum_total_by_estado(ENTREGADO),
+            )

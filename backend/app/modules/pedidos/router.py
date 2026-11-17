@@ -2,11 +2,18 @@ from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.core.deps import get_current_active_user
+from app.core.deps import AdminUser, get_current_active_user
 from app.modules.productos.service import ProductoNoEncontrado
 from app.modules.usuarios.models import ROLE_ADMIN, Usuario
 
-from .schemas import EstadoPedido, PedidoCreate, PedidoRead, PedidosPaginados
+from .schemas import (
+    CambioEstado,
+    EstadoPedido,
+    PedidoCreate,
+    PedidoRead,
+    PedidosPaginados,
+    ResumenPedidos,
+)
 from .service import (
     PedidoAjeno,
     PedidoNoEncontrado,
@@ -56,9 +63,33 @@ def listar_pedidos(
     return service.listar(user.id, user.role == ROLE_ADMIN, estado, skip, limit)  # type: ignore[arg-type]
 
 
+# Importante: /resumen se declara ANTES de /{pedido_id}.
+@router.get("/resumen", response_model=ResumenPedidos)
+def resumen_pedidos(_: AdminUser, service: ServiceDep) -> ResumenPedidos:
+    return service.resumen()
+
+
 @router.get("/{pedido_id}", response_model=PedidoRead)
 def obtener_pedido(pedido_id: int, user: CurrentUser, service: ServiceDep) -> PedidoRead:
     try:
         return service.obtener(pedido_id, user.id, user.role == ROLE_ADMIN)  # type: ignore[arg-type]
+    except ERRORES_DOMINIO as exc:
+        raise _traducir(exc)
+
+
+@router.patch("/{pedido_id}/estado", response_model=PedidoRead)
+def cambiar_estado(
+    pedido_id: int, data: CambioEstado, _: AdminUser, service: ServiceDep
+) -> PedidoRead:
+    try:
+        return service.cambiar_estado(pedido_id, data.estado)
+    except ERRORES_DOMINIO as exc:
+        raise _traducir(exc)
+
+
+@router.patch("/{pedido_id}/cancelar", response_model=PedidoRead)
+def cancelar_pedido(pedido_id: int, user: CurrentUser, service: ServiceDep) -> PedidoRead:
+    try:
+        return service.cancelar_propio(pedido_id, user.id)  # type: ignore[arg-type]
     except ERRORES_DOMINIO as exc:
         raise _traducir(exc)
