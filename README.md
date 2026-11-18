@@ -55,3 +55,51 @@ La API queda en `http://localhost:8000/api/v1` y la documentación en
 Los clientes se crean desde el registro público (rol `user`).
 
 ## Frontend
+
+Desde la carpeta `frontend/` (con el backend ya ejecutándose):
+
+```bash
+pnpm install
+cp .env.example .env              # Windows: copy .env.example .env
+pnpm build                        # verifica los tipos (TypeScript estricto)
+pnpm dev
+```
+
+La aplicación queda en `http://localhost:5173`. Ese puerto es el que admite el CORS del backend:
+si está ocupado, Vite falla en vez de usar otro.
+
+Otros comandos: `pnpm lint` (ESLint, incluye la regla que prohíbe `any`) y `pnpm preview`.
+
+### Variables de entorno (`frontend/.env`)
+
+| Variable | Descripción | Ejemplo |
+|---|---|---|
+| `VITE_API_URL` | URL base de la API, con el prefijo `/api/v1` | `http://localhost:8000/api/v1` |
+
+### Pantallas
+
+| Ruta | Pantalla | Acceso |
+|---|---|---|
+| `/` | Catálogo (paginado en el servidor, búsqueda y filtro por categoría) | Público |
+| `/login`, `/register` | Inicio de sesión y registro | Público |
+| `/carrito` | Carrito (persiste al recargar) | Público |
+| `/checkout` | Confirmar pedido | Sesión |
+| `/mis-pedidos` | Mis pedidos, con detalle y cancelación en `PENDIENTE` | Sesión |
+| `/admin/resumen` | Indicadores del negocio | admin |
+| `/admin/categorias`, `/admin/productos` | ABM, incluido el cambio de stock y disponibilidad | admin |
+| `/admin/pedidos` | Pedidos con cambio de estado | admin |
+| `/admin/usuarios` | Activar y desactivar usuarios | admin |
+
+## Arquitectura
+
+**Backend** (`backend/app/`): un paquete por dominio en `modules/` (`auth`, `usuarios`, `categorias`,
+`productos`, `pedidos`) con la cadena Router → Service → Unit of Work → Repository → Model, e infraestructura
+compartida en `core/`. El commit ocurre solo en el `__exit__` del Unit of Work: ningún Service ni Router llama a
+`session.commit()`.
+
+**Frontend** (`frontend/src/`): organizado por features (`features/<dominio>/{pages,components,hooks,api,types}`),
+con lo transversal en `shared/`, el estado del cliente en `store/` (Zustand: sesión y carrito) y las rutas en
+`routes/`. El estado del servidor lo gestiona TanStack Query.
+
+**Sesión:** el JWT viaja en una cookie `HttpOnly`. El frontend nunca lee ni guarda el token; solo conserva en el
+navegador los datos básicos del usuario (id, username, nombre completo, email y rol).

@@ -11,9 +11,17 @@ class CategoriaRepository(BaseRepository[Categoria]):
     def __init__(self, session: Session) -> None:
         super().__init__(session, Categoria)
 
-    def get_by_nombre(self, nombre: str) -> Optional[Categoria]:
-        """Busca por nombre sin filtrar por `activo`: la baja lógica no libera el nombre único."""
-        return self.session.exec(select(Categoria).where(Categoria.nombre == nombre)).first()
+    def get_by_nombre(self, nombre: str, excluir_id: Optional[int] = None) -> Optional[Categoria]:
+        """Busca por nombre sin distinguir mayúsculas ni filtrar por `activo`."""
+        nombre_normalizado = nombre.casefold()
+        return next(
+            (
+                categoria
+                for categoria in self.session.exec(select(Categoria)).all()
+                if categoria.id != excluir_id and categoria.nombre.casefold() == nombre_normalizado
+            ),
+            None,
+        )
 
     def get_activa(self, categoria_id: int) -> Optional[Categoria]:
         """Devuelve la categoría solo si existe y está activa (una dada de baja es 'inexistente')."""
