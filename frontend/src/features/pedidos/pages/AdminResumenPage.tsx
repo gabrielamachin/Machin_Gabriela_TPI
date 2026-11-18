@@ -16,7 +16,7 @@ export function AdminResumenPage() {
         <p className="text-sm text-slate-500">Indicadores generales del negocio.</p>
       </div>
 
-      {resumen.isLoading ? (
+      {resumen.isPending ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
           {Array.from({ length: 6 }, (_, indice) => (
             <Skeleton key={indice} className="h-28 w-full rounded-xl" />
@@ -27,7 +27,7 @@ export function AdminResumenPage() {
           mensaje={handleApiError(resumen.error, 'No se pudo cargar el resumen.')}
           onReintentar={() => void resumen.refetch()}
         />
-      ) : !resumen.data ? null : (
+      ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <TarjetaResumen
             titulo="Pendientes"

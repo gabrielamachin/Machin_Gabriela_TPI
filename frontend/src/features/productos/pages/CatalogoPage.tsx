@@ -90,7 +90,7 @@ export function CatalogoPage() {
         )}
       </form>
 
-      {productos.isLoading ? (
+      {productos.isPending ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: LIMITE }, (_, indice) => (
             <ProductoCardSkeleton key={indice} />
@@ -101,7 +101,7 @@ export function CatalogoPage() {
           mensaje={handleApiError(productos.error, 'No se pudo cargar el catálogo.')}
           onReintentar={() => void productos.refetch()}
         />
-      ) : !productos.data ? null : productos.data.items.length === 0 ? (
+      ) : productos.data.items.length === 0 ? (
         <EstadoVacio
           titulo={hayFiltros ? 'No encontramos productos con esos filtros' : 'Todavía no hay productos'}
           descripcion={

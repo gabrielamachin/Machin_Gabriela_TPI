@@ -128,7 +128,7 @@ export function AdminProductosPage() {
         <Button onClick={abrirAlta}>Nuevo producto</Button>
       </div>
 
-      {productos.isLoading ? (
+      {productos.isPending ? (
         <div className="flex flex-col gap-2" aria-hidden="true">
           {Array.from({ length: 5 }, (_, indice) => (
             <Skeleton key={indice} className="h-14 w-full rounded-lg" />
@@ -139,7 +139,7 @@ export function AdminProductosPage() {
           mensaje={handleApiError(productos.error, 'No se pudieron cargar los productos.')}
           onReintentar={() => void productos.refetch()}
         />
-      ) : !productos.data ? null : productos.data.items.length === 0 ? (
+      ) : productos.data.items.length === 0 ? (
         <EstadoVacio titulo="Todavía no hay productos" descripcion="Cargá el primero para armar el catálogo.">
           <Button onClick={abrirAlta}>Nuevo producto</Button>
         </EstadoVacio>

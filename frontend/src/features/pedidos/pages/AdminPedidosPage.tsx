@@ -44,11 +44,6 @@ export function AdminPedidosPage() {
 
   const pedidoDetalle = pedidos.data?.items.find((pedido) => pedido.id === detalleId)
 
-  const pedirCambio = (pedidoId: number, estado: EstadoPedido) => {
-    setErrorCambio(null)
-    setCambio({ pedidoId, estado })
-  }
-
   const columnas = useMemo<ColumnDef<Pedido>[]>(
     () => [
       {
@@ -93,12 +88,25 @@ export function AdminPedidosPage() {
                 Detalle
               </Button>
               {siguiente && (
-                <Button tamano="sm" onClick={() => pedirCambio(pedido.id, siguiente)}>
+                <Button
+                  tamano="sm"
+                  onClick={() => {
+                    setErrorCambio(null)
+                    setCambio({ pedidoId: pedido.id, estado: siguiente })
+                  }}
+                >
                   {ETIQUETAS_ACCION[siguiente]}
                 </Button>
               )}
               {puedeCancelar(pedido.estado) && (
-                <Button variante="danger" tamano="sm" onClick={() => pedirCambio(pedido.id, 'CANCELADO')}>
+                <Button
+                  variante="danger"
+                  tamano="sm"
+                  onClick={() => {
+                    setErrorCambio(null)
+                    setCambio({ pedidoId: pedido.id, estado: 'CANCELADO' })
+                  }}
+                >
                   Cancelar
                 </Button>
               )}
@@ -152,7 +160,7 @@ export function AdminPedidosPage() {
         </div>
       </div>
 
-      {pedidos.isLoading ? (
+      {pedidos.isPending ? (
         <div className="flex flex-col gap-2" aria-hidden="true">
           {Array.from({ length: 5 }, (_, indice) => (
             <Skeleton key={indice} className="h-14 w-full rounded-lg" />
@@ -163,7 +171,7 @@ export function AdminPedidosPage() {
           mensaje={handleApiError(pedidos.error, 'No se pudieron cargar los pedidos.')}
           onReintentar={() => void pedidos.refetch()}
         />
-      ) : !pedidos.data ? null : pedidos.data.items.length === 0 ? (
+      ) : pedidos.data.items.length === 0 ? (
         <EstadoVacio
           titulo={filtros.estado ? 'No hay pedidos en ese estado' : 'Todavía no hay pedidos'}
           descripcion={filtros.estado ? undefined : 'Cuando los clientes confirmen pedidos, aparecen acá.'}

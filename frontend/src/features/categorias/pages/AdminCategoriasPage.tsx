@@ -85,7 +85,7 @@ export function AdminCategoriasPage() {
         <Button onClick={abrirAlta}>Nueva categoría</Button>
       </div>
 
-      {categorias.isLoading ? (
+      {categorias.isPending ? (
         <div className="flex flex-col gap-2" aria-hidden="true">
           {Array.from({ length: 4 }, (_, indice) => (
             <Skeleton key={indice} className="h-12 w-full rounded-lg" />
@@ -96,7 +96,7 @@ export function AdminCategoriasPage() {
           mensaje={handleApiError(categorias.error, 'No se pudieron cargar las categorías.')}
           onReintentar={() => void categorias.refetch()}
         />
-      ) : !categorias.data ? null : categorias.data.length === 0 ? (
+      ) : categorias.data.length === 0 ? (
         <EstadoVacio titulo="Todavía no hay categorías" descripcion="Creá la primera para empezar a cargar productos.">
           <Button onClick={abrirAlta}>Nueva categoría</Button>
         </EstadoVacio>

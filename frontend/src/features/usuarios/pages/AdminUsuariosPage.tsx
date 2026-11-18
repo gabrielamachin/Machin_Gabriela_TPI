@@ -25,8 +25,6 @@ export function AdminUsuariosPage() {
 
   const sesionId = usuarioSesion?.id
   const ocupado = activar.isPending || desactivar.isPending
-  const datos = usuarios.data ?? []
-
   const { mutate: mutarActivar } = activar
   const activarUsuario = useCallback(
     (usuario: Usuario) => {
@@ -129,7 +127,7 @@ export function AdminUsuariosPage() {
         </p>
       )}
 
-      {usuarios.isLoading ? (
+      {usuarios.isPending ? (
         <div className="flex flex-col gap-2" aria-hidden="true">
           {Array.from({ length: 5 }, (_, indice) => (
             <Skeleton key={indice} className="h-12 w-full rounded-lg" />
@@ -140,10 +138,10 @@ export function AdminUsuariosPage() {
           mensaje={handleApiError(usuarios.error, 'No se pudieron cargar los usuarios.')}
           onReintentar={() => void usuarios.refetch()}
         />
-      ) : datos.length === 0 ? (
+      ) : usuarios.data.length === 0 ? (
         <EstadoVacio titulo="No hay usuarios" />
       ) : (
-        <DataTable datos={datos} columnas={columnas} />
+        <DataTable datos={usuarios.data} columnas={columnas} />
       )}
 
       <Modal abierto={desactivando !== null} onCerrar={() => setDesactivando(null)} titulo="Desactivar usuario">

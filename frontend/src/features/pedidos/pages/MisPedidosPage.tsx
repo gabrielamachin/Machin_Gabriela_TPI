@@ -76,7 +76,7 @@ export function MisPedidosPage() {
         </div>
       </div>
 
-      {pedidos.isLoading ? (
+      {pedidos.isPending ? (
         <div className="flex flex-col gap-3" aria-hidden="true">
           {Array.from({ length: 3 }, (_, indice) => (
             <Skeleton key={indice} className="h-24 w-full rounded-xl" />
@@ -87,7 +87,7 @@ export function MisPedidosPage() {
           mensaje={handleApiError(pedidos.error, 'No se pudieron cargar tus pedidos.')}
           onReintentar={() => void pedidos.refetch()}
         />
-      ) : !pedidos.data ? null : pedidos.data.items.length === 0 ? (
+      ) : pedidos.data.items.length === 0 ? (
         <EstadoVacio
           titulo={filtros.estado ? 'No tenés pedidos en ese estado' : 'Todavía no hiciste pedidos'}
           descripcion={filtros.estado ? undefined : 'Cuando confirmes un pedido, lo vas a ver acá.'}
