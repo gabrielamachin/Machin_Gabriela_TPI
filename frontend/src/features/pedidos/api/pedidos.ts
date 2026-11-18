@@ -1,6 +1,7 @@
 import { axiosInstance } from '@/shared/api/axiosInstance'
 
 import type {
+  EstadoPedido,
   FiltrosPedidos,
   Pedido,
   PedidoCreate,
@@ -32,5 +33,11 @@ export async function cancelarPedido(pedidoId: number): Promise<Pedido> {
 
 export async function getResumen(): Promise<ResumenPedidos> {
   const { data } = await axiosInstance.get<ResumenPedidos>('/pedidos/resumen')
+  return data
+}
+
+/** Solo admin: avanza o cancela un pedido según la máquina de estados. */
+export async function cambiarEstadoPedido(pedidoId: number, estado: EstadoPedido): Promise<Pedido> {
+  const { data } = await axiosInstance.patch<Pedido>(`/pedidos/${pedidoId}/estado`, { estado })
   return data
 }

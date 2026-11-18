@@ -10,15 +10,31 @@ import { useState } from 'react'
 
 import { Paginacion } from '@/shared/components/Paginacion'
 
+/** Paginación hecha por el backend: la tabla muestra tal cual las filas recibidas. */
+export interface PaginacionServidor {
+  /** Página actual, empezando en 0. */
+  pagina: number
+  limite: number
+  /** Total de filas en el servidor (no solo las de esta página). */
+  total: number
+  onCambiar: (pagina: number) => void
+}
+
 interface DataTableProps<T> {
   datos: T[]
   columnas: ColumnDef<T>[]
-  /** Filas por página (la paginación es del lado del cliente). */
+  /** Filas por página cuando la paginación es del lado del cliente. */
   tamanoPagina?: number
+  /** Si se indica, la paginación es del servidor y `tamanoPagina` se ignora. */
+  paginacionServidor?: PaginacionServidor
 }
 
-/** Tabla del panel de administración con TanStack Table: ordenable y paginada en el cliente. */
-export function DataTable<T>({ datos, columnas, tamanoPagina = 10 }: DataTableProps<T>) {
+/**
+ * Tabla del panel de administración con TanStack Table. Es ordenable y puede paginar
+ * del lado del cliente (por defecto) o del servidor (con `paginacionServidor`).
+ * Con paginación del servidor, el orden por columna afecta solo a la página visible.
+ */
+export function DataTable<T>({ datos, columnas, tamanoPagina = 10, paginacionServidor }: DataTableProps<T>) {
   const [orden, setOrden] = useState<SortingState>([])
 
   const tabla = useReactTable({
@@ -28,7 +44,8 @@ export function DataTable<T>({ datos, columnas, tamanoPagina = 10 }: DataTablePr
     onSortingChange: setOrden,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: paginacionServidor !== undefined,
+    ...(paginacionServidor ? {} : { getPaginationRowModel: getPaginationRowModel() }),
     initialState: { pagination: { pageSize: tamanoPagina } },
   })
 
@@ -84,12 +101,21 @@ export function DataTable<T>({ datos, columnas, tamanoPagina = 10 }: DataTablePr
         </table>
       </div>
 
-      <Paginacion
-        pagina={pageIndex}
-        limite={pageSize}
-        total={datos.length}
-        onCambiar={(pagina) => tabla.setPageIndex(pagina)}
-      />
+      {paginacionServidor ? (
+        <Paginacion
+          pagina={paginacionServidor.pagina}
+          limite={paginacionServidor.limite}
+          total={paginacionServidor.total}
+          onCambiar={paginacionServidor.onCambiar}
+        />
+      ) : (
+        <Paginacion
+          pagina={pageIndex}
+          limite={pageSize}
+          total={datos.length}
+          onCambiar={(pagina) => tabla.setPageIndex(pagina)}
+        />
+      )}
     </div>
   )
 }
