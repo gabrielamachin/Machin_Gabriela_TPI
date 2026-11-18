@@ -12,6 +12,7 @@ import { MisPedidosPage } from '@/features/pedidos/pages/MisPedidosPage'
 import { AdminProductosPage } from '@/features/productos/pages/AdminProductosPage'
 import { CatalogoPage } from '@/features/productos/pages/CatalogoPage'
 import { AdminUsuariosPage } from '@/features/usuarios/pages/AdminUsuariosPage'
+import { AdminLayout } from '@/shared/layout/AdminLayout'
 import { MainLayout } from '@/shared/layout/MainLayout'
 
 import { ProtectedRoute } from './ProtectedRoute'
@@ -34,14 +35,16 @@ export function AppRouter() {
             <Route path="mis-pedidos" element={<MisPedidosPage />} />
           </Route>
 
-          {/* Solo admin */}
+          {/* Solo admin, con el menú de secciones del panel */}
           <Route element={<ProtectedRoute roles={['admin']} />}>
-            <Route path="admin" element={<Navigate to="/admin/resumen" replace />} />
-            <Route path="admin/resumen" element={<AdminResumenPage />} />
-            <Route path="admin/categorias" element={<AdminCategoriasPage />} />
-            <Route path="admin/productos" element={<AdminProductosPage />} />
-            <Route path="admin/pedidos" element={<AdminPedidosPage />} />
-            <Route path="admin/usuarios" element={<AdminUsuariosPage />} />
+            <Route element={<AdminLayout />}>
+              <Route path="admin" element={<Navigate to="/admin/resumen" replace />} />
+              <Route path="admin/resumen" element={<AdminResumenPage />} />
+              <Route path="admin/categorias" element={<AdminCategoriasPage />} />
+              <Route path="admin/productos" element={<AdminProductosPage />} />
+              <Route path="admin/pedidos" element={<AdminPedidosPage />} />
+              <Route path="admin/usuarios" element={<AdminUsuariosPage />} />
+            </Route>
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

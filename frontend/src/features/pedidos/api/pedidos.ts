@@ -1,6 +1,12 @@
 import { axiosInstance } from '@/shared/api/axiosInstance'
 
-import type { FiltrosPedidos, Pedido, PedidoCreate, PedidosPaginados } from '../types'
+import type {
+  FiltrosPedidos,
+  Pedido,
+  PedidoCreate,
+  PedidosPaginados,
+  ResumenPedidos,
+} from '../types'
 
 export async function crearPedido(datos: PedidoCreate): Promise<Pedido> {
   const { data } = await axiosInstance.post<Pedido>('/pedidos', datos)
@@ -21,5 +27,10 @@ export async function getPedidos(filtros: FiltrosPedidos): Promise<PedidosPagina
 
 export async function cancelarPedido(pedidoId: number): Promise<Pedido> {
   const { data } = await axiosInstance.patch<Pedido>(`/pedidos/${pedidoId}/cancelar`)
+  return data
+}
+
+export async function getResumen(): Promise<ResumenPedidos> {
+  const { data } = await axiosInstance.get<ResumenPedidos>('/pedidos/resumen')
   return data
 }
