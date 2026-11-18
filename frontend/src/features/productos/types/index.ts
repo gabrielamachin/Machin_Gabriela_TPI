@@ -17,3 +17,11 @@ export interface ProductosPaginados {
   total: number
   items: Producto[]
 }
+
+/** Filtros del listado. `pagina` empieza en 0: skip = pagina × limite. */
+export interface FiltrosProductos {
+  search?: string
+  categoria_id?: number
+  pagina: number
+  limite: number
+}
