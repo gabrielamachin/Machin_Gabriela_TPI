@@ -1,13 +1,7 @@
 import type { ButtonHTMLAttributes } from 'react'
 
-type Variante = 'primary' | 'secondary' | 'danger' | 'ghost'
-type Tamano = 'sm' | 'md'
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variante?: Variante
-  tamano?: Tamano
-  cargando?: boolean
-}
+export type Variante = 'primary' | 'secondary' | 'danger' | 'ghost'
+export type Tamano = 'sm' | 'md'
 
 const VARIANTES: Record<Variante, string> = {
   primary: 'bg-orange-600 text-white hover:bg-orange-700 focus-visible:outline-orange-600',
@@ -19,6 +13,17 @@ const VARIANTES: Record<Variante, string> = {
 const TAMANOS: Record<Tamano, string> = {
   sm: 'px-3 py-1.5 text-sm',
   md: 'px-4 py-2 text-sm',
+}
+
+/** Clases de un botón. Las comparte ButtonLink para que un enlace se vea igual que un botón. */
+export function clasesBoton(variante: Variante, tamano: Tamano, extra = ''): string {
+  return `inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTES[variante]} ${TAMANOS[tamano]} ${extra}`
+}
+
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variante?: Variante
+  tamano?: Tamano
+  cargando?: boolean
 }
 
 export function Button({
@@ -35,7 +40,7 @@ export function Button({
     <button
       type={type}
       disabled={disabled || cargando}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTES[variante]} ${TAMANOS[tamano]} ${className}`}
+      className={clasesBoton(variante, tamano, className)}
       {...resto}
     >
       {cargando ? 'Procesando…' : children}

@@ -101,7 +101,7 @@ export function CatalogoPage() {
           mensaje={handleApiError(productos.error, 'No se pudo cargar el catálogo.')}
           onReintentar={() => void productos.refetch()}
         />
-      ) : productos.data.items.length === 0 ? (
+      ) : !productos.data ? null : productos.data.items.length === 0 ? (
         <EstadoVacio
           titulo={hayFiltros ? 'No encontramos productos con esos filtros' : 'Todavía no hay productos'}
           descripcion={
