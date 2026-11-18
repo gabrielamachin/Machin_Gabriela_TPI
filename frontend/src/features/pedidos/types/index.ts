@@ -38,3 +38,10 @@ export interface PedidosPaginados {
   total: number
   items: Pedido[]
 }
+
+/** Filtros del listado. `pagina` empieza en 0: skip = pagina × limite. */
+export interface FiltrosPedidos {
+  estado?: EstadoPedido
+  pagina: number
+  limite: number
+}
