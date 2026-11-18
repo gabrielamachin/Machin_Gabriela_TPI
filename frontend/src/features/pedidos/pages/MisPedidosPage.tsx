@@ -14,7 +14,7 @@ import { PedidoCard } from '../components/PedidoCard'
 import { PedidoDetalle } from '../components/PedidoDetalle'
 import { ESTADOS_PEDIDO, ETIQUETAS_ESTADO } from '../constants'
 import { useCancelarPedido } from '../hooks/useCancelarPedido'
-import { usePedidos } from '../hooks/usePedidos'
+import { useMisPedidos } from '../hooks/usePedidos'
 import type { FiltrosPedidos } from '../types'
 
 const LIMITE = 10
@@ -25,7 +25,7 @@ export function MisPedidosPage() {
   const [cancelarId, setCancelarId] = useState<number | null>(null)
   const [errorCancelar, setErrorCancelar] = useState<string | null>(null)
 
-  const pedidos = usePedidos(filtros)
+  const pedidos = useMisPedidos(filtros)
   const cancelar = useCancelarPedido()
 
   // Se busca en los datos vigentes (y no se guarda el objeto): así el detalle nunca queda desactualizado.

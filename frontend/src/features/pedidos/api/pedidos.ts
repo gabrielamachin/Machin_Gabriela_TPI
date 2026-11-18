@@ -26,6 +26,17 @@ export async function getPedidos(filtros: FiltrosPedidos): Promise<PedidosPagina
   return data
 }
 
+export async function getMisPedidos(filtros: FiltrosPedidos): Promise<PedidosPaginados> {
+  const { data } = await axiosInstance.get<PedidosPaginados>('/pedidos/mis-pedidos', {
+    params: {
+      skip: filtros.pagina * filtros.limite,
+      limit: filtros.limite,
+      estado: filtros.estado,
+    },
+  })
+  return data
+}
+
 export async function cancelarPedido(pedidoId: number): Promise<Pedido> {
   const { data } = await axiosInstance.patch<Pedido>(`/pedidos/${pedidoId}/cancelar`)
   return data

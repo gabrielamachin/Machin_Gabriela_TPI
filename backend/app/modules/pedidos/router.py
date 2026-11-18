@@ -69,6 +69,17 @@ def resumen_pedidos(_: AdminUser, service: ServiceDep) -> ResumenPedidos:
     return service.resumen()
 
 
+@router.get("/mis-pedidos", response_model=PedidosPaginados)
+def listar_mis_pedidos(
+    user: CurrentUser,
+    service: ServiceDep,
+    skip: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    estado: Optional[EstadoPedido] = None,
+) -> PedidosPaginados:
+    return service.listar(user.id, False, estado, skip, limit)  # type: ignore[arg-type]
+
+
 @router.get("/{pedido_id}", response_model=PedidoRead)
 def obtener_pedido(pedido_id: int, user: CurrentUser, service: ServiceDep) -> PedidoRead:
     try:
