@@ -48,8 +48,8 @@ class CategoriaService:
             if campos.get("nombre") is None:
                 campos.pop("nombre", None)  # el nombre es obligatorio: null = no cambiar
             else:
-                otra = uow.categorias.get_by_nombre(campos["nombre"])
-                if otra is not None and otra.id != categoria.id:
+                otra = uow.categorias.get_by_nombre(campos["nombre"], excluir_id=categoria.id)
+                if otra is not None:
                     raise NombreDuplicado()
 
             for campo, valor in campos.items():
