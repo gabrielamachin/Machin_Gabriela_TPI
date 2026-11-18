@@ -1,8 +1,15 @@
-// Placeholder: en los próximos commits llama a checkSession al montar y renderiza AppRouter.
+import { useEffect } from 'react'
+
+import { AppRouter } from '@/routes/AppRouter'
+import { useAuthStore } from '@/store/authStore'
+
 export default function App() {
-  return (
-    <main className="grid min-h-screen place-items-center bg-slate-50 text-slate-800">
-      <h1 className="text-3xl font-bold">Food Store</h1>
-    </main>
-  )
+  const checkSession = useAuthStore((estado) => estado.checkSession)
+
+  // Única llamada permitida en useEffect: confirma con /auth/me si la cookie de sesión sigue vigente.
+  useEffect(() => {
+    void checkSession()
+  }, [checkSession])
+
+  return <AppRouter />
 }
