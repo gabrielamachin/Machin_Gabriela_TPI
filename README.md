@@ -4,7 +4,7 @@ Sistema de pedidos de comida **Foodstore**: backend **FastAPI + SQLModel** y fro
 
 - **Estudiante:** Gabriela Machin
 - **Repositorio:** https://github.com/gabrielamachin/Machin_Gabriela_TPI
-- **Video de demostración:** _(completar con el link)_
+- **Video de demostración:** https://drive.google.com/file/d/13ZmDUFxiJLrsmPgVL6EP6ei5_xktIGl0/view?usp=sharing
 
 ## Requisitos
 
