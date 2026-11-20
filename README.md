@@ -14,16 +14,30 @@ Sistema de pedidos de comida **Foodstore**: backend **FastAPI + SQLModel** y fro
 
 ## Backend
 
-Desde la carpeta `backend/`:
+Desde la carpeta `backend/`. **Importante: usar Python 3.11, 3.12 o 3.13.** Con Python 3.14 la
+aplicación no arranca, porque SQLModel 0.0.22 no es compatible.
 
 ```bash
-python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
+# Linux / macOS
+python3.13 -m venv venv
+source venv/bin/activate
+
+# Windows (PowerShell): `py` permite elegir la versión
+py -3.13 -m venv venv
+venv\Scripts\activate
+```
+
+```bash
+python --version                  # debe mostrar 3.11, 3.12 o 3.13
 pip install -r requirements.txt
 cp .env.example .env              # Windows: copy .env.example .env
 ```
 
-Editar `.env` (ver la tabla de variables) y cargar los datos iniciales:
+Después de copiarlo, abrir `backend/.env` y completar `SECRET_KEY` (mínimo 32 caracteres) y el
+usuario y la contraseña de PostgreSQL en `DATABASE_URL`.
+
+Con la base `foodstore_db` ya creada en PostgreSQL y el `.env` completo (ver la tabla de variables),
+cargar los datos iniciales y levantar la API:
 
 ```bash
 python -m app.db.seed
